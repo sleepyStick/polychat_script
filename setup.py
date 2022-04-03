@@ -20,7 +20,7 @@ def main():
     #write all the other config information
     config_json = {}
     config_json['email'] = email
-    with open('config/config', 'w') as config_file:
+    with open('config/config.json', 'w') as config_file:
         json.dump(config_json, config_file)
 
     #get their floor
