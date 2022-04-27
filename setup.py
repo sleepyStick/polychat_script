@@ -5,6 +5,8 @@ import json
 import pyAesCrypt
 import os
 
+API_auth = None
+headers = None
 def main():
     #get the users login information
     email = input("Please type your email here: ")
@@ -20,9 +22,6 @@ def main():
     #write all the other config information
     config_json = {}
     config_json['email'] = email
-    with open('config/config.json', 'w') as config_file:
-        json.dump(config_json, config_file)
-
     #get their floor
     building_code = input("Building code (IE 172D): ").upper()
     floor = input("Floor: ")
@@ -31,17 +30,36 @@ def main():
     API_auth = HTTPBasicAuth(email, API_key)
     headers = {'Accept': 'application/json'}
 
-    #query selects the first and last names from the Booking table where the roomspace matches user inputs and the booking is InRoom
-    query = f'SELECT NameLast, NameFirst FROM Booking JOIN Entry WHERE RoomSpace like "{building_code}-{floor}%" And EntryStatusEnum = "5" ORDER BY Entry.NameLast'
-    
-    #request the data from the server
-    names = requests.get(f'https://calpoly.starrezhousing.com/StarRezREST/services/query?q={quote(query)} / GET', 
-    headers=headers,
-    auth=API_auth).json()
+    names = get_resident_names(building_code, floor)
 
-    #write the names to a file
+    #get the security ID
+    query = f'SELECT SecurityUserID FROM SecurityUser WHERE EmailAddress = "hevans03@calpoly.edu"'
+    SecurityID = query_DB(query)[0]["SecurityUserID"]
+
+    #Write to config files
+
+    config_json['SecurityID'] = SecurityID
+    with open('config/config.json', 'w') as config_file:
+        json.dump(config_json, config_file)
+    
+    #write resident names to a file
     with open('config/residentNames.json', 'w') as names_file:
         json.dump(names, names_file)
 
 if __name__ == "__main__":
     main()
+
+
+def query_DB(SQL_query):
+    return requests.get(f'https://calpoly.starrezhousing.com/StarRezREST/services/query?q={quote(SQL_query)}',
+    headers=headers,
+    auth=API_auth)
+
+def get_resident_names(building_code, floor):
+    #query selects the first and last names and the EntryID  from the Booking table 
+    # where the roomspace matches user inputs and the booking is InRoom
+    query = f'SELECT NameLast, NameFirst, EntryID FROM Booking JOIN Entry WHERE RoomSpace like "{building_code}-{floor}%" And EntryStatusEnum = "5" ORDER BY Entry.NameLast' 
+    #request the data from the server
+    return query_DB(query).json()
+
+    
