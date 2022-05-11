@@ -20,9 +20,9 @@ def main():
     email = config['email']
 
     #TODO make this autofill at some point
+    #Resident Name & Entry ID
     res_name = input("Resident Name: ")
     entry_id = get_entry_id(res_name)
-
 
     #Date of the polychat
     date_in = input("Date (leave blank for today) (MM/DD/YY): ")
@@ -35,8 +35,8 @@ def main():
     else:
         chat_date = datetime.now()
 
+    #custom fields (LE's & description)
     custom_fields = {}
-
     #Description of the polychat
     custom_fields['description']= input("Description: ")
 
@@ -70,6 +70,8 @@ def main():
 
     upload_resident(program_id, entry_id, email, API_key)
 
+    upload_custom_fields(program_id, custom_fields, email, API_key)
+
 
 def get_entry_id(res_name):
     with open(RESIDENTS_PATH) as residents_file:
@@ -97,19 +99,16 @@ def get_API_key(password):
 
 def upload_chat(chat_json, RA_email, API_Key):
     API_Auth = HTTPBasicAuth(RA_email, API_Key)
-    tableName = 'Program'
-    create_url = f'https://calpoly.starrezhousing.com/StarRezREST/services/create/{tableName}'
+    create_url = get_create_url('Program')
     programID = requests.get(create_url,
         headers=HTTP_headers,
         params=chat_json,
-        auth=API_Auth).json()
-    print(programID)
+        auth=API_Auth).json()['ProgramID']
     return programID
 
 def upload_resident(program_id, entry_id, RA_email, API_Key):
     API_Auth = HTTPBasicAuth(RA_email, API_Key)
-    tableName = 'ProgramEntry'
-    create_url = f'https://calpoly.starrezhousing.com/StarRezREST/services/create/{tableName}'
+    create_url = get_create_url('ProgramEntry')
     program_entry_id = requests.get(create_url,
         headers=HTTP_headers,
         params={
@@ -132,7 +131,7 @@ def upload_custom_fields(program_id, cust_fields, RA_email, API_Key):
     API_Auth = HTTPBasicAuth(RA_email, API_Key)
     
     query = f'SELECT ProgramCustomFieldID, CustomFieldDefinitionID FROM ProgramCustomField WHERE ProgramID = "{program_id}"'
-    query_url = f'https://calpoly.starrezhousing.com/StarRezREST/services/query?q={quote(query)}'
+    query_url = get_query_url(query)
     custom_fields_SR = requests.get(query_url,
         headers=HTTP_headers,
         auth=API_Auth).json()
@@ -143,13 +142,25 @@ def upload_custom_fields(program_id, cust_fields, RA_email, API_Key):
         field_def_id = custom_field_SR['CustomFieldDefinitionID']
         field_val = cust_fields_from_id[field_def_id]
         isInt = isinstance(cust_fields_from_id[field_def_id], int)
-        update_url = f"https://calpoly.starrezhousing.com/StarRezREST/services/update/{tableName}/{field_id}"
+        update_url = get_update_url(tableName, field_id)
         requests.get(update_url,
             headers=HTTP_headers,
             auth=API_Auth,
             params={
                 "ValueInteger" if isInt else "ValueString": field_val
             })
+
+    return [field['ProgramCustomFieldID'] for field in custom_fields_SR]
+
+def get_create_url(tableName):
+    return f"https://calpoly.starrezhousing.com/StarRezREST/services/create/{tableName}"
+
+def get_update_url(tableName, itemID):
+    return f"https://calpoly.starrezhousing.com/StarRezREST/services/update/{tableName}/{itemID}"
+
+def get_query_url(query):
+    return f'https://calpoly.starrezhousing.com/StarRezREST/services/query?q={quote(query)}'
+
 
 
 
