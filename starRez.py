@@ -100,7 +100,8 @@ class starRezDB:
         return self.query(query)[0]
 
     def create_item(self, tableName, params={}):
-        assert tableName in mutable_tables
+        if not tableName in mutable_tables:
+            raise Exception(f"Tried to mutate {tableName} which is not a mutable table")
         response = self.sess.get(f"{self.BASE_URL}/create/{tableName}", params=params)
         if not response.ok:
             raise Exception(f"Tried to create object in {tableName}\nGot back {response.status_code}: {response.reason}\nparams: {params}")
@@ -108,7 +109,8 @@ class starRezDB:
 
 
     def update_item(self, tableName, itemID, params={}):
-        assert tableName in mutable_tables
+        if not tableName in mutable_tables:
+            raise Exception(f"Tried to mutate {tableName} which is not a mutable table")
         response = self.sess.get(f"{self.BASE_URL}/update/{tableName}/{itemID}", params=params)
         if not response.ok:
             raise Exception(f"Tried to update: {itemID} in {tableName}\nGot back {response.status_code}: {response.reason}\nparams: {params}")
@@ -116,21 +118,31 @@ class starRezDB:
 
     def delete_item(self, tableName, itemID):
         #make sure we're deleting from okay tables
-        assert tableName in mutable_tables
-        #make sure the item we created 
+        if tableName not in mutable_tables:
+            raise Exception(f"Tried to modify {tableName} which is not a mutable table")
+        
+        #make sure we're deleting an item that we created
         with open(CONFIG_PATH) as config:
             config_json = json.load(config)
         userID = config_json['SecurityID']
-        if tableName == 'ProgramCustomField':
-            #special verification for these bad boys, since they don't have a secUserID themselves
-            cust_field = self.get_item("ProgramCustomField", itemID)
-            owner = self.get_item("Program", cust_field['ProgramID'])['AssignedTo_SecurityUserID']
-            assert owner == userID
-        else:
-            assert userID == self.get_item(tableName, itemID)['AssignedTo_SecurityUserID']
+        if userID != self.get_owner(tableName, itemID):
+                raise Exception(f"Tried to modify {itemID} in {tableName} which is not owned by you!")
         response = self.sess.get(f"{self.BASE_URL}/delete/{tableName}/{itemID}")
         if not response.ok:
             raise Exception(f"Tried to delete: {itemID} from {tableName}\nGot back {response.status_code}: {response.reason}")
+
+    def get_owner(self, tableName, itemID):
+        if tableName == 'ProgramCustomField':
+            #special verification for these bad boys, since they don't have a secUserID themselves
+            cust_field = self.get_item("ProgramCustomField", itemID)
+            return self.get_item("Program", cust_field['ProgramID'])['AssignedTo_SecurityUserID']
+        elif tableName in ['Program', 'ProgramEntry']:
+            return self.get_item(tableName, itemID)['AssignedTo_SecurityUserID']
+
+        else:
+            raise Exception(f"{tableName} is not supported by get_owner. Should be one of: {mutable_tables}")
+
+
 
 
 
