@@ -26,3 +26,9 @@ def get_API_key(password):
         API_key = key_file.read()
     os.remove('config/key')
     return API_key
+
+def write_API_key(API_key, password):
+    with open('temporary', 'w') as tempFile:
+        tempFile.write(API_key)
+    pyAesCrypt.encryptFile('temporary', KEY_PATH, password)
+    os.remove('temporary')

@@ -7,6 +7,7 @@ from util import get_API_key, get_config, get_entry_id
 def main():
     config = get_config()
     email = config['email']
+    community = config['community']
 
     #TODO make this autofill at some point
     #Resident Name & Entry ID
@@ -39,9 +40,6 @@ def main():
 
     #TODO make this only do first name unless you have conflicting first names
     chat_title = f"{res_name}-{datetime.today().strftime('%B')}-PC"
-
-    #TODO make this configurable
-    community = "yakʔitʸutʸu 2"
 
     password = getpass.getpass()
     API_key = get_API_key(password)

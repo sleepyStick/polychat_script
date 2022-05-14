@@ -14,6 +14,13 @@ class starRezDB:
         self.sess = requests.Session()
         self.sess.headers = {'Accept': 'application/json'}
         self.sess.auth = (email, API_key)
+        #make sure this actually worked
+        try:
+            response = self.sess.get(f"{self.BASE_URL}/databaseinfo/tablelist")
+            if not response.ok:
+                raise Exception("Invalid API credentials")
+        except:
+            raise Exception("Invalid API credentials")
 
     # high level methds to create chats & such
 
@@ -141,7 +148,6 @@ class starRezDB:
 
         else:
             raise Exception(f"{tableName} is not supported by get_owner. Should be one of: {mutable_tables}")
-
 
 
 

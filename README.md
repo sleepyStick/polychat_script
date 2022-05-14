@@ -11,8 +11,8 @@ This script is designed to be used by Cal Poly Resident Advisors to assist in th
 
 ## TODO:
 - Error Checking
-    * When requests return 400 errors
-    * Bad user input
+    * ~~When requests return 400 errors~~
+    * ~~Bad user input~~
 - A way to search resident names
 - Make more things configurable on setup (community, current term)
 - change terms (Fall, Spring, Winter) automatically
