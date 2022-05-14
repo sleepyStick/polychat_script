@@ -4,6 +4,7 @@ from urllib.parse import quote
 import json
 import pyAesCrypt
 import os
+from starRez import query_DB
 
 API_auth = None
 headers = None
@@ -36,6 +37,9 @@ def main():
     query = f'SELECT SecurityUserID FROM SecurityUser WHERE EmailAddress = "hevans03@calpoly.edu"'
     SecurityID = query_DB(query)[0]["SecurityUserID"]
 
+    #Figure out the community
+    
+
     #Write to config files
 
     config_json['SecurityID'] = SecurityID
@@ -48,12 +52,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-def query_DB(SQL_query):
-    return requests.get(f'https://calpoly.starrezhousing.com/StarRezREST/services/query?q={quote(SQL_query)}',
-    headers=headers,
-    auth=API_auth)
 
 def get_resident_names(building_code, floor):
     #query selects the first and last names and the EntryID  from the Booking table 
