@@ -1,4 +1,3 @@
-from zipapp import get_interpreter
 from starRez import starRezDB
 from util import get_API_key
 from datetime import datetime, timedelta

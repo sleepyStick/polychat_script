@@ -1,12 +1,6 @@
-import json
 from datetime import datetime, timedelta
-import pyAesCrypt
-import os
-import requests
-from requests.auth import HTTPBasicAuth
 import getpass
-from urllib.parse import quote
-from starRez import make_polychat
+from starRez import starRezDB
 from path_constants import *
 from util import get_API_key, get_config, get_entry_id
 
@@ -54,15 +48,14 @@ def main():
     password = getpass.getpass()
     API_key = get_API_key(password)
 
-    make_polychat(email=email,
-        entry_id=entry_id,
+    starRez = starRezDB(email, API_key)
+
+    starRez.make_polychat(entry_id=entry_id,
         chat_begin=chat_date,
         chat_end=chat_date + timedelta(minutes=15),
         custom_fields=custom_fields,
         term_session_id=194, #add this to the config file at some point
         chat_title=f"{res_name}-{datetime.today().strftime('%B')}-PC",
-        API_Key=API_key,
-        RA_email=email,
         community=community)
 
 
