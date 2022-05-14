@@ -14,33 +14,31 @@ def main():
     entry_id = get_entry_id(res_name)
 
     #Date of the polychat
-    date_in = input("Date (leave blank for today) (MM/DD/YY): ")
-    if date_in:
-        date_sep = date_in.split("/")
-        chat_date = datetime( int(date_sep[2]) + 2000,
-            int(date_sep[0]), 
-            int(date_sep[1]),
-            hour=12)
-    else:
-        chat_date = datetime.now()
+    while True:
+        date_in = input("Date (leave blank for today) (MM/DD/YY): ")
+        try:
+            if date_in:
+                date_sep = date_in.split("/")
+                assert len(date_sep) == 3
+                chat_date = datetime( int(date_sep[2]) + 2000,
+                    int(date_sep[0]), 
+                    int(date_sep[1]),
+                    hour=12)
+            else:
+                chat_date = datetime.now()
+        except:
+            print("Invalid date. Follow the format MM/DD/YY")
+            continue
+        break
 
-    #custom fields (LE's & description)
-    custom_fields = {}
-    #Description of the polychat
-    custom_fields['description']= input("Description: ")
-
-    custom_fields['beSmart'] = input("Be smart: ")
-    custom_fields['beSmart'] = int(custom_fields['beSmart']) if custom_fields['beSmart'] else 0
-    custom_fields['beTheChange'] = input("Be the change: ")
-    custom_fields['beTheChange'] = int(custom_fields['beTheChange']) if custom_fields['beTheChange'] else 0
-    custom_fields['beWell'] = input("Be well: ")
-    custom_fields['beWell'] = int(custom_fields['beWell']) if custom_fields['beWell'] else 0
+    #custom fields (LO's & description)
+    custom_fields = get_custom_fields()
 
     #TODO make this dynamic and preferably switch over automatically
     term_session_id = 194
 
     #TODO make this only do first name unless you have conflicting first names
-    chat_title = f"{res_name}-Spring-Polychat"
+    chat_title = f"{res_name}-{datetime.today().strftime('%B')}-PC"
 
     #TODO make this configurable
     community = "yakʔitʸutʸu 2"
@@ -54,9 +52,31 @@ def main():
         chat_begin=chat_date,
         chat_end=chat_date + timedelta(minutes=15),
         custom_fields=custom_fields,
-        term_session_id=194, #add this to the config file at some point
-        chat_title=f"{res_name}-{datetime.today().strftime('%B')}-PC",
+        term_session_id=term_session_id,
+        chat_title=chat_title,
         community=community)
+
+def get_custom_fields():
+    result = {}
+    #Description
+    while True:
+        result['description'] = input("Description: ")
+        if len(result['description']) > 0:
+            break
+
+    for LO in ['beTheChange', 'beWell', 'beSmart']:
+        while True:
+            try:
+                result[LO] = input(LO+": ")
+                result[LO] = int(result[LO]) if result[LO] else 0
+            except:
+                print("Please input an integer 0-3")
+                continue
+            if result[LO] >=0 and result[LO] <= 3:
+                break
+            else:
+                print("Please input an integer 0-3")
+    return result
 
 
 if __name__ == "__main__":
