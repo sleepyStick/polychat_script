@@ -1,4 +1,6 @@
 .venv/*
-config/*
+*.aes
+config.json
+residentNames.json
 .vscode/*
 __pycache__
