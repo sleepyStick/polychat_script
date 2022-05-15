@@ -5,7 +5,7 @@ from urllib.parse import quote
 from path_constants import *
 import pyAesCrypt
 
-mutable_tables = ['Program', 'ProgramEntry', 'ProgramCustomField']
+mutable_tables = ['Program', 'ProgramEntry', 'ProgramCustomField', 'WorkflowHistory']
 
 class starRezDB:
     BASE_URL = "https://calpoly.starrezhousing.com/StarRezREST/services"
@@ -92,6 +92,18 @@ class starRezDB:
     def get_polychat_residents(self, chatID):
         query = f"SELECT EntryID FROM ProgramEntry WHERE ProgramID = {chatID}"
         return [entry['EntryID'] for entry in self.query(query)]
+
+    def submit_polychat(self, chatID):
+        #Update the polychat w/ new owner and workflow step
+        self.update_item("Program", chatID, params={"WorkflowStepID": 28, "AssignedTo_SecurityUserID": 543,})
+        #Create new WorkflowHistory object
+        with open(WORKFLOW_PATH) as workflow_template_file:
+            workflow_template = json.load(workflow_template_file)
+        with open(CONFIG_PATH) as config_file:
+            userID = json.load(config_file)['SecurityID']
+        workflow_template['TableID'] = chatID
+        workflow_template['From_SecurityUserID'] = userID
+        self.create_item("WorkflowHistory", params=workflow_template)
 
 
 

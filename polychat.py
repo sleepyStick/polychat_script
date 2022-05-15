@@ -46,13 +46,14 @@ def main():
 
     starRez = starRezDB(email, API_key)
 
-    starRez.make_polychat(entry_id=entry_id,
+    chat_id = starRez.make_polychat(entry_id=entry_id,
         chat_begin=chat_date,
         chat_end=chat_date + timedelta(minutes=15),
         custom_fields=custom_fields,
         term_session_id=term_session_id,
         chat_title=chat_title,
         community=community)
+    starRez.submit_polychat(chat_id)
 
 def get_custom_fields():
     result = {}
