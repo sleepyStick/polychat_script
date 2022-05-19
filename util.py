@@ -32,3 +32,7 @@ def write_API_key(API_key, password):
         tempFile.write(API_key)
     pyAesCrypt.encryptFile('temporary', KEY_PATH, password)
     os.remove('temporary')
+
+def get_resident_list():
+    with open(RESIDENTS_PATH) as res_name_file:
+        return json.load(res_name_file)

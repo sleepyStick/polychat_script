@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import getpass
 from starRez import starRezDB
 from path_constants import *
-from util import get_API_key, get_config, get_entry_id
+from util import get_API_key, get_config, get_entry_id, get_resident_list
 
 def main():
     config = get_config()
@@ -11,8 +11,32 @@ def main():
 
     #TODO make this autofill at some point
     #Resident Name & Entry ID
-    res_name = input("Resident Name: ")
-    entry_id = get_entry_id(res_name)
+    res_name_list = get_resident_list()
+    search_input = input("Search your resident by first or last name: ")
+    while True:
+        results = list(filter(lambda x: search_input in x['Name'], res_name_list))
+        if len(results) == 1:
+            entry_id = results[0]['EntryID']
+            res_name = results[0]['Name']
+            print(f"Resident Selected: {res_name}")
+            break
+        elif len(results) == 0:
+            print("No results, try again")
+            search_input = input("Resident Name: ")
+            continue
+        for i in range(len(results)):
+            print(f"[{i}]:\t{results[i]['Name']}")
+        print("Type the number of the resident you are enterring, or type another name")
+        user_input = input("# or Resident Name: ")
+        try:
+            entry_id = results[int(user_input)]['EntryID']
+            res_name = results[int(user_input)]['Name']
+            break
+        except:
+            search_input = user_input
+            continue
+
+
 
     #Date of the polychat
     while True:

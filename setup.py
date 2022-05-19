@@ -1,4 +1,3 @@
-
 import json
 from starRez import starRezDB
 from util import write_API_key
@@ -37,6 +36,8 @@ def main():
     floor = input("Floor: ")
 
     names = get_resident_names(starRez, building_code, floor)
+    for name in names:
+        name['Name'] = f"{name.pop('NameFirst')} {name.pop('NameLast')}"
 
     #get the security ID
     query = f'SELECT SecurityUserID FROM SecurityUser WHERE EmailAddress = "{email}"'
