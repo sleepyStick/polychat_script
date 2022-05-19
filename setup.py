@@ -21,8 +21,8 @@ def main():
 
     print("Make a good password. It won't appear as you are typing it. This is normal.")
     password = getpass()
-    community = input("List your community here (IE PCV 2) (If you live in yakʔitʸutʸu you can just type ytt1 or ytt2): ")
-    community = community.replace(" ", "").replace("ytt", "yakʔitʸutʸu ")
+    community = input("List your community here (IE PCV 2) (If you live in yakʔitʸutʸu you can just type ytt 1 or ytt 2): ")
+    community = community.replace(" ", "").replace("ytt", "yakʔitʸutʸu")
 
     #encrypt the API key
     write_API_key(API_key, password)
