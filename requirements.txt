@@ -1,3 +1,2 @@
 pyAesCrypt
-getpass
-urllib
+requests
